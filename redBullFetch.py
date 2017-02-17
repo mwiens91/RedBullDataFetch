@@ -3,7 +3,7 @@ from subprocess import Popen as popen
 
 def splitVideo(avFile, interval=200 ,saveDir=os.getcwd() + '/screens'):
     # interval is in milliseconds - convert to fps
-    fps = '%f' % (1.0 / (interval * 10**3))
+    fps = '%f' % (10**3 / interval)
 
     # check if save directory exists. create it if not
     if not os.path.exists(saveDir):
