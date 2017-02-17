@@ -1,11 +1,12 @@
 import os
 import subprocess
+import re
 import csv
 from PIL import Image
 from tesserocr import image_to_text
 
-def generateScreenCaps(avFile, interval=200
-        ,screenDir=os.getcwd() + '/screens'):
+def generateScreenCaps(avFile, interval=200,
+                screenDir=os.getcwd() + '/screens'):
     # Interval is in milliseconds - convert to fps
     fps = '%f' % (10**3 / interval)
 
@@ -13,11 +14,17 @@ def generateScreenCaps(avFile, interval=200
     if not os.path.exists(screenDir):
         os.makedirs(screenDir)
 
+    # Check if save directory is empty; abort if not
+    if not os.listdir(screenDir):
+        print(screenDir + ' is not empty!')
+        print('Empty it out before running this!')
+        return False
+
     # Generate screencaptures ussing ffmpeg
     subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + fps,
         screenDir + '/img%05d.bmp']) 
 
-    return
+    return True
 
 def processScreenCap(screenCaptureObj):
 
@@ -43,9 +50,21 @@ def processScreenCap(screenCaptureObj):
     heart = heart.rstrip()
     respir = respir.rstrip()
 
-    return (time, altitude, speed, heart, respir)
+    # Convert the time to seconds
+    matchTime = re.match(
+        r'^(?P<sign>-?)(?P<mins>\d+):(?P<secs>\d+)\.(?P<msecs>\d+)$', time)
+    timePretty = float(matchTime.group('mins')) * 60 + float(matchTime.group('secs'))
+        + float(matchTime.group('msecs')) * 10**(-3)
+
+    # In the video time is negative before the jump
+    if matchTime.group('sign')
+        timePretty *= -1
+
+    return (timePretty, altitude, speed, heart, respir)
 
 def parseScreenCaptures(csvFile, screenDir=os.getcwd() + '/screens'):
+    
+
     
 
 if __name__ == '__main__':
@@ -54,7 +73,11 @@ if __name__ == '__main__':
     videoPath = sys.argv[1]
 
     print("Generating screencaptures . . .")
-    generateScreenCaps(videoPath)
+
+#    if not generateScreenCaps(videoPath):       # exit if something went amiss 
+#        print("Exiting script . . . ")
+#        sys.exit(0)
+
     print("Done")
 
     print("Writing to CSV . . . ")
