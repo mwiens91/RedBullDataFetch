@@ -2,7 +2,7 @@ A Python3 script to read data from https://www.youtube.com/watch?v=raiFrxbHxV0
 
 Use:
 
-```bash
+```
 python3 redBullFetch.py videoname
 ```
 
