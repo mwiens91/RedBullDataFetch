@@ -3,14 +3,15 @@ from subprocess import Popen as popen
 
 def splitVideo(avFile, interval=200 ,saveDir=os.getcwd() + '/screens'):
     # interval is in milliseconds - convert to fps
-    fps = 1.0 / (interval * 10**3)
+    fps = '%f' % (1.0 / (interval * 10**3))
 
     # check if save directory exists. create it if not
-    if not os.path.exists('./' + saveDir):
-        os.makedirs('./' + saveDir)
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
 
     # generate screencaptures
-    popen('ffmpeg -i ' + avFile + ' -vf fps=' + fps + ' img%05d.bmp') 
+    popen('ffmpeg -i ' + './' +  avFile + ' -vf fps=' + fps
+        + ' ' + saveDir + '/img%05d.bmp') 
 
     return
 
