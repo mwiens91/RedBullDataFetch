@@ -53,16 +53,17 @@ def processScreenCap(screenCaptureObj):
     # Convert the time to seconds
     matchTime = re.match(
         r'^(?P<sign>-?)(?P<mins>\d+):(?P<secs>\d+)\.(?P<msecs>\d+)$', time)
-    timePretty = float(matchTime.group('mins')) * 60 + float(matchTime.group('secs'))
+    timePretty = float(matchTime.group('mins')) * 60 + float(matchTime.group('secs')) \
         + float(matchTime.group('msecs')) * 10**(-3)
 
     # In the video time is negative before the jump
-    if matchTime.group('sign')
+    if matchTime.group('sign') == '-':
         timePretty *= -1
 
     return (timePretty, altitude, speed, heart, respir)
 
 def parseScreenCaptures(csvFile, screenDir=os.getcwd() + '/screens'):
+    return
     
 
     
@@ -70,17 +71,17 @@ def parseScreenCaptures(csvFile, screenDir=os.getcwd() + '/screens'):
 if __name__ == '__main__':
     import sys
 
-    videoPath = sys.argv[1]
+#    videoPath = sys.argv[1]
 
-    print("Generating screencaptures . . .")
+#    print("Generating screencaptures . . .")
 
 #    if not generateScreenCaps(videoPath):       # exit if something went amiss 
 #        print("Exiting script . . . ")
 #        sys.exit(0)
 
-    print("Done")
+#    print("Done")
 
-    print("Writing to CSV . . . ")
+#    print("Writing to CSV . . . ")
 
 
     screen = Image.open('./screens/img000001.bmp')
