@@ -30,15 +30,16 @@ def generateScreenCaps(avFile, fps=15,
         print('Use existing files? (exit otherwise)')
         if input('(Y/N) > ').lower() in {'yes', 'y', 'ye', ''}:
             print()
-            return True
+            return
         else:
-            return False
+            print()
+            raise OSError('Need an empty directory to generate screencaps!')
 
     # Generate screencaptures using ffmpeg
     subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + fps,
         screenDir + '/img%08d.bmp'])
 
-    return True
+    return
 
 
 def processScreenCap(screenCaptureObj):
@@ -196,9 +197,11 @@ if __name__ == '__main__':
 
     print("Getting screencaptures . . .", end='\n\n')
 
-    # Second argument is the number of frames you want to capture
-    # per second of video
-    if not generateScreenCaps(videoPath, 10000):
+    try:
+        # Second argument is the number of frames you want to capture
+        # per second of video
+        generateScreenCaps(videoPath, .01)
+    except OSError:
         print("Exiting script . . . ")
         sys.exit(1)
     
