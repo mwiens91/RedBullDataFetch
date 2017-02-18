@@ -24,6 +24,8 @@ I used youtube-dl to download the above video with default settings (HQ), but th
 
 Works on Linux, probably on Mac, and definitely not on Windows.
 
+--
+
 Dependencies:
 
 Python 3 - https://www.python.org/
