@@ -70,7 +70,7 @@ def processScreenCap(screenCaptureObj):
     heart = heart.rstrip()
     respir = respir.rstrip()
 
-    # Convert the time to seconds
+    # Split time string into components
     matchTime = re.match(
         r'^(?P<sign>-?)(?P<mins>\d+):(?P<secs>\d+)\.(?P<msecs>\d+)$', time)
 
@@ -78,7 +78,7 @@ def processScreenCap(screenCaptureObj):
     # return false
     try:
         # A number of sanity checks follow. Sometimes
-        # errors sneak in, so it's good to be overly cautious here
+        # errors sneak in, so it's good to overly cautious here
         if (len(heart) != 3 or
             len(respir) != 2 or
             len(speed) == 0 or
@@ -88,6 +88,7 @@ def processScreenCap(screenCaptureObj):
             ):
             raise AttributeError('Bad data')
 
+        # Convert time components into seconds
         timePretty = (float(matchTime.group('mins')) * 60
                 + float(matchTime.group('secs'))
                 + float(matchTime.group('msecs')) * 1e-3)
