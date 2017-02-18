@@ -33,6 +33,7 @@ tesserocr - https://pypi.python.org/pypi/tesserocr
 
 Pillow	  - https://pypi.python.org/pypi/Pillow/4.0.0
 
+
 --
 
 Possible improvements:

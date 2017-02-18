@@ -36,12 +36,15 @@ def generateScreenCaps(avFile, interval=200,
 def processScreenCap(screenCaptureObj):
 
     # Extract subset of image corresponding to data
-    timeImg = screenCaptureObj.crop((585,662,749,698))
+    timeImg = screenCaptureObj.crop((589,656,751,701))
+#    vertGImg = screenCaptureObj.crop((595,731,642,751))
+#    latGImg = screenCaptureObj.crop((595,751,635,772))
+#    longGImg = screenCaptureObj.crop((596,771,639,792))
     altitudeImg = screenCaptureObj.crop((1359,226,1464,254))    # in m
     speedImg = screenCaptureObj.crop((1665,226,1764,256))       # in kph 
     heartImg = screenCaptureObj.crop((1368,526,1460,555))       # in bpm
     respirImg = screenCaptureObj.crop((1356,565,1463,594))      # respiration
-                                                                # in ????
+                                                                # in ???
 
     # Process images for more accurate OCR readings
     # The time has a semitransparent moving background,
@@ -52,6 +55,12 @@ def processScreenCap(screenCaptureObj):
     # there are better modifications
     timeImg = timeImg.convert('L')
     timeImg = timeImg.point(lambda x: 0 if x<220 else 255, '1') 
+#    vertGImg = vertGImg.convert('L')
+#    vertGImg = vertGImg.point(lambda x: 0 if x<220 else 255, '1') 
+#    latGImg = latGImg.convert('L')
+#    latGImg = latGImg.point(lambda x: 0 if x<220 else 255, '1') 
+#    longGImg = longGImg.convert('L')
+#    longGImg = longGImg.point(lambda x: 0 if x<220 else 255, '1') 
 
     altitudeImg = altitudeImg.convert('L')
     speedImg = speedImg.convert('L')
@@ -64,6 +73,9 @@ def processScreenCap(screenCaptureObj):
     speed = image_to_text(speedImg)
     heart = image_to_text(heartImg)
     respir = image_to_text(respirImg)
+#    vertG = image_to_text(vertGImg)
+#    latG = image_to_text(latGImg)
+#    longG = image_to_text(longGImg)
 
     # Strip trailing whitespace Tesseract OCR seems to pick up 
     time = time.rstrip()
@@ -71,6 +83,9 @@ def processScreenCap(screenCaptureObj):
     speed = speed.rstrip()
     heart = heart.rstrip()
     respir = respir.rstrip()
+#    vertG = vertG.rstrip()
+#    latG = latG.rstrip()
+#    longG = longG.rstrip()
 
     # Split time string into components
     matchTime = re.match(
@@ -81,11 +96,14 @@ def processScreenCap(screenCaptureObj):
     try:
         # A number of sanity checks follow. Sometimes
         # errors sneak in, so it's good to overly cautious here
-        if (len(heart) != 3 or
-            len(respir) != 2 or
-            len(speed) == 0 or
-            len(matchTime.group('mins')) != 2 or
-            len(matchTime.group('secs')) != 2 or
+        # Choose which conditions you like (or add more), depending
+        # on what errors you want to allow.
+        if (
+            len(heart) != 3 or                  # heart rate is 3 digits
+            len(respir) != 2 or                 # respiration is 2 digits
+            len(speed) == 0 or                  # speed is not 0 digits
+            len(matchTime.group('mins')) != 2 or    # Next 3 lines:
+            len(matchTime.group('secs')) != 2 or    # time not corrupted
             len(matchTime.group('msecs')) != 3
             ):
             raise AttributeError('Bad data')
@@ -100,6 +118,7 @@ def processScreenCap(screenCaptureObj):
                 timePretty *= -1
 
         return (timePretty, altitude, speed, heart, respir)
+
     except AttributeError:
         # Such error! OCR failed!
         return False
@@ -161,7 +180,7 @@ if __name__ == '__main__':
         print("Exiting script . . . ")
         sys.exit(1)
     
-    print("\nFinished getting screencaptures", end='\n\n')
+    print("Finished getting screencaptures", end='\n\n')
 
     print("Writing to csv . . . ", end='\n\n')
 
