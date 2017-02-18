@@ -5,11 +5,19 @@ import csv
 from PIL import Image
 from tesserocr import image_to_text
 
-def generateScreenCaps(avFile, interval=200,
+def generateScreenCaps(avFile, fps=15,
                         screenDir=os.getcwd() + '/screens'):
+    '''
+    Generate screen captures from a video file using an FFmpeg call
+    on the command line
 
-    # Interval is in milliseconds - convert to fps
-    fps = '%f' % (10**3 / interval)
+    Arguments:
+    avFile - relative path to video file
+    fps - number of frames to capture per second
+            default is 15 if left out
+    screenDir - relative path to screencapture directory
+            Default is ./screens
+    '''
 
     # Check if save directory exists; create it if not
     if not os.path.exists(screenDir):
@@ -34,6 +42,9 @@ def generateScreenCaps(avFile, interval=200,
 
 
 def processScreenCap(screenCaptureObj):
+    '''
+    Extract text from a screencapture PIL image object
+    '''
 
     # Extract subset of image corresponding to data
     timeImg = screenCaptureObj.crop((589,656,751,701))
@@ -126,6 +137,15 @@ def processScreenCap(screenCaptureObj):
 
 def writeScreenCapData(screenDir=os.getcwd() + '/screens',
                         dataSheetFile='./data.csv'):
+    '''
+    Write data to a csv file. A "parent" function.
+
+    Arguments:
+    screenDir - relative path to screencapture directory
+            Default is ./screens
+    dataSheetFile - relative path to csv datasheet
+            Defailt is ./data.csv
+    '''
 
     # Open a datasheet
     # If the file given in the argument dataSheetFile exists,
@@ -176,7 +196,9 @@ if __name__ == '__main__':
 
     print("Getting screencaptures . . .", end='\n\n')
 
-    if not generateScreenCaps(videoPath, 10000): # exit if something went amiss
+    # Second argument is the number of frames you want to capture
+    # per second of video
+    if not generateScreenCaps(videoPath, 10000):
         print("Exiting script . . . ")
         sys.exit(1)
     
