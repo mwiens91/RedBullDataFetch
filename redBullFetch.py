@@ -3,6 +3,7 @@ import subprocess
 import re
 import csv
 from PIL import Image
+from PIL import ImageEnhance
 from tesserocr import image_to_text
 
 def generateScreenCaps(avFile, interval=200,
@@ -16,14 +17,14 @@ def generateScreenCaps(avFile, interval=200,
         os.makedirs(screenDir)
 
     # Check if save directory is empty; abort if not
-    if not os.listdir(screenDir):
+    if os.listdir(screenDir):
         print(screenDir + ' is not empty!')
         print('Empty it out before running this!')
         return False
 
-    # Generate screencaptures ussing ffmpeg
+    # Generate screencaptures using ffmpeg
     subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + fps,
-        screenDir + '/img%09d.bmp'])
+        screenDir + '/img%08d.bmp'])
 
     return True
 
@@ -37,6 +38,19 @@ def processScreenCap(screenCaptureObj):
     heartImg = screenCaptureObj.crop((1368,526,1460,555))       # in bpm
     respirImg = screenCaptureObj.crop((1356,565,1463,594))      # respiration
                                                                 # in ????
+
+    # Sharpen time image for more accurate OCR readings
+    # The time has a semitransparent moving background,
+    # making text recognition difficult
+    #
+    # I've kind of haphazardly determined that these settings
+    # result in an improvement of text recognition, but doubtless
+    # there are better modifications
+    timeImg = timeImg.convert('L')
+#    timeImg = ImageEnhance.Contrast(timeImg)
+#    timeImg = timeImg.enhance(10)
+#    timeImg = ImageEnhance.Sharpness(timeImg)
+#    timeImg = timeImg.enhance(2)
 
     # Extract text from images using Tesseract OCR
     time = image_to_text(timeImg)
@@ -55,15 +69,22 @@ def processScreenCap(screenCaptureObj):
     # Convert the time to seconds
     matchTime = re.match(
         r'^(?P<sign>-?)(?P<mins>\d+):(?P<secs>\d+)\.(?P<msecs>\d+)$', time)
-    timePretty = float(matchTime.group('mins')) * 60 \
-            + float(matchTime.group('secs')) \
-            + float(matchTime.group('msecs')) * 10**(-3)
 
-    # In the video time is negative before the jump
-    if matchTime.group('sign') == '-':
-        timePretty *= -1
+    # Return the data points if everything is okay. Otherwise
+    # return false
+    try:
+        timePretty = (float(matchTime.group('mins')) * 60
+                + float(matchTime.group('secs'))
+                + float(matchTime.group('msecs')) * 1e-3)
 
-    return (timePretty, altitude, speed, heart, respir)
+        # In the video time is negative before the jump
+        if matchTime.group('sign') == '-':
+                timePretty *= -1
+
+        return (timePretty, altitude, speed, heart, respir)
+    except AttributeError:
+        # Such error! OCR failed!
+        return False
 
 
 def writeScreenCapData(screenDir=os.getcwd() + '/screens',
@@ -82,27 +103,37 @@ def writeScreenCapData(screenDir=os.getcwd() + '/screens',
         print("Enter the relative path for the datasheet:")
         dataSheetFile = input("> ")
 
-    dataFile = open(dataSheetFile, 'wb')
+    dataFile = open(dataSheetFile, 'w')
     dataWriter = csv.writer(dataFile)
 
     # Write headings to the data sheet 
-    dataWriter.writerow('Time (s)', 'Altitude (m)', 'Speed (kph)',
-        'Heart rate (bpm)', 'Respiration (???')
-
+    dataWriter.writerow(('Time (s)', 'Altitude (m)', 'Speed (kph)',
+        'Heart rate (bpm)', 'Respiration (???)'))
 
     # Get all screencapture filenames
     screenCaps = os.listdir(screenDir)
+    screenCaps.sort()
     
     # Process each screencapture
+    errorCount = 0
+    successCount = 0
     for cap in screenCaps:
         with Image.open(screenDir + '/' + cap) as capObj:
             imgData = processScreenCap(capObj)
-            dataWriter.writerow(imgData)
+
+            if imgData != False:
+                dataWriter.writerow(imgData)
+                successCount += 1
+            else:
+                errorCount += 1
+
+    # Calculate the error rate
+    errorRate = float(errorCount) / (errorCount + successCount)
 
     # Close the data file
     dataFile.close()
 
-    return
+    return errorRate
     
 
 if __name__ == '__main__':
@@ -110,13 +141,16 @@ if __name__ == '__main__':
 
     videoPath = sys.argv[1]
 
-    print("Generating screencaptures . . .")
+    print("Generating screencaptures . . .", end='\n\n')
 
-    if not generateScreenCaps(videoPath):       # exit if something went amiss
+    if not generateScreenCaps(videoPath, 20000):       # exit if something went amiss
         print("Exiting script . . . ")
         sys.exit(0)
+    
+    print("Finished generating screencaptures", end='\n\n')
 
-    print("Done")
+    print("Writing to csv . . . ", end='\n\n')
 
-    print("Writing to CSV . . . ")
+    errorRate = writeScreenCapData()
 
+    print("Finished writing to csv with an error rate of " + str(errorRate))
