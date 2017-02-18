@@ -78,7 +78,7 @@ def processScreenCap(screenCaptureObj):
     # return false
     try:
         # A number of sanity checks follow. Sometimes
-        # errors sneak in, so it's good to overly cautious here
+        # errors sneak in, so it's good to be overly cautious here
         if (len(heart) != 3 or
             len(respir) != 2 or
             len(speed) == 0 or
