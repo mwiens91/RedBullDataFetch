@@ -5,7 +5,7 @@ import csv
 from PIL import Image
 from tesserocr import image_to_text
 
-def generateScreenCaps(avFile, fps=15,
+def generateScreenCaps(avFile, fps=3,
                         screenDir=os.getcwd() + '/screens'):
     '''
     Generate screen captures from a video file using an FFmpeg call
@@ -200,7 +200,7 @@ if __name__ == '__main__':
     try:
         # Second argument is the number of frames you want to capture
         # per second of video
-        generateScreenCaps(videoPath, .01)
+        generateScreenCaps(videoPath, 1)
     except OSError:
         print("Exiting script . . . ")
         sys.exit(1)
