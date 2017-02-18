@@ -39,7 +39,7 @@ def processScreenCap(screenCaptureObj):
     respirImg = screenCaptureObj.crop((1356,565,1463,594))      # respiration
                                                                 # in ????
 
-    # Sharpen time image for more accurate OCR readings
+    # Sharpen images for more accurate OCR readings
     # The time has a semitransparent moving background,
     # making text recognition difficult
     #
@@ -51,6 +51,10 @@ def processScreenCap(screenCaptureObj):
 #    timeImg = timeImg.enhance(10)
 #    timeImg = ImageEnhance.Sharpness(timeImg)
 #    timeImg = timeImg.enhance(2)
+    altitudeImg = altitudeImg.convert('L')
+    speedImg = speedImg.convert('L')
+    heartImg = heartImg.convert('L')
+    respirImg = respirImg.convert('L')
 
     # Extract text from images using Tesseract OCR
     time = image_to_text(timeImg)
@@ -73,6 +77,17 @@ def processScreenCap(screenCaptureObj):
     # Return the data points if everything is okay. Otherwise
     # return false
     try:
+        # A number of sanity checks follow. Sometimes
+        # errors sneak in, so it's good to overly cautious here
+        if (len(heart) != 3 or
+            len(respir) != 2 or
+            len(speed) == 0 or
+            len(matchTime.group('mins')) != 2 or
+            len(matchTime.group('secs')) != 2 or
+            len(matchTime.group('msecs')) != 3
+            ):
+            raise AttributeError('Bad data')
+
         timePretty = (float(matchTime.group('mins')) * 60
                 + float(matchTime.group('secs'))
                 + float(matchTime.group('msecs')) * 1e-3)
@@ -143,7 +158,7 @@ if __name__ == '__main__':
 
     print("Generating screencaptures . . .", end='\n\n')
 
-    if not generateScreenCaps(videoPath, 20000):       # exit if something went amiss
+    if not generateScreenCaps(videoPath, 10000):       # exit if something went amiss
         print("Exiting script . . . ")
         sys.exit(0)
     
