@@ -4,7 +4,7 @@ Writes to a csv file data.csv located in the current working directory by defaul
 
 Because of compression in the Youtube video, and also due to imperfections in Tesseract OCR, some data points become corrupted and are not included in the output csv. A consequence of this is that the time intervals between points will not in general be uniform.
 
-The error rate is about 50% (yikes!). This isn't quite so bad considering that the video time count has about 540000ms. This means that at most we can expect to get around 270,000 data points, which is not so bad for many purposes.
+The error rate is about 35% (yikes!). This isn't quite so bad considering that the video time count has about 540000ms. This means that at most we can expect to get around 350,000 data points, which is not so bad for many purposes.
 
 Run this on the command line with
 

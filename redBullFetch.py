@@ -3,7 +3,6 @@ import subprocess
 import re
 import csv
 from PIL import Image
-#from PIL import ImageEnhance
 from tesserocr import image_to_text
 
 def generateScreenCaps(avFile, interval=200,
@@ -44,7 +43,7 @@ def processScreenCap(screenCaptureObj):
     respirImg = screenCaptureObj.crop((1356,565,1463,594))      # respiration
                                                                 # in ????
 
-    # Sharpen images for more accurate OCR readings
+    # Process images for more accurate OCR readings
     # The time has a semitransparent moving background,
     # making text recognition difficult
     #
@@ -52,10 +51,8 @@ def processScreenCap(screenCaptureObj):
     # result in an improvement of text recognition, but doubtless
     # there are better modifications
     timeImg = timeImg.convert('L')
-#    timeImg = ImageEnhance.Contrast(timeImg)
-#    timeImg = timeImg.enhance(10)
-#    timeImg = ImageEnhance.Sharpness(timeImg)
-#    timeImg = timeImg.enhance(2)
+    timeImg = timeImg.point(lambda x: 0 if x<220 else 255, '1') 
+
     altitudeImg = altitudeImg.convert('L')
     speedImg = speedImg.convert('L')
     heartImg = heartImg.convert('L')
