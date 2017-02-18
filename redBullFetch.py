@@ -3,7 +3,7 @@ import subprocess
 import re
 import csv
 from PIL import Image
-from PIL import ImageEnhance
+#from PIL import ImageEnhance
 from tesserocr import image_to_text
 
 def generateScreenCaps(avFile, interval=200,
@@ -16,11 +16,16 @@ def generateScreenCaps(avFile, interval=200,
     if not os.path.exists(screenDir):
         os.makedirs(screenDir)
 
-    # Check if save directory is empty; abort if not
+    # Check if save directory is empty; if it isn't
+    # prompt to use existing files or exit script
     if os.listdir(screenDir):
-        print(screenDir + ' is not empty!')
-        print('Empty it out before running this!')
-        return False
+        print(screenDir + ' is not empty!', end='\n\n')
+        print('Use existing files? (exit otherwise)')
+        if input('(Y/N) > ').lower() in {'yes', 'y', 'ye', ''}:
+            print()
+            return True
+        else:
+            return False
 
     # Generate screencaptures using ffmpeg
     subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + fps,
@@ -109,15 +114,11 @@ def writeScreenCapData(screenDir=os.getcwd() + '/screens',
     # Open a datasheet
     # If the file given in the argument dataSheetFile exists,
     # prompt for a new file path until there isn't a conflict.
-
-    # I could just exit the program here, but then that risks
-    # losing a LOT of image files (since the script is currently
-    # set up only to run from a clean slate); so even though
-    # this is annoying, I feel like it's a necessary annoyance
     while os.path.isfile(dataSheetFile):
         print(dataSheetFile + " already exists!")
         print("Enter the relative path for the datasheet:")
         dataSheetFile = input("> ")
+        print()
 
     dataFile = open(dataSheetFile, 'w')
     dataWriter = csv.writer(dataFile)
@@ -157,13 +158,13 @@ if __name__ == '__main__':
 
     videoPath = sys.argv[1]
 
-    print("Generating screencaptures . . .", end='\n\n')
+    print("Getting screencaptures . . .", end='\n\n')
 
-    if not generateScreenCaps(videoPath, 10000):       # exit if something went amiss
+    if not generateScreenCaps(videoPath, 10000): # exit if something went amiss
         print("Exiting script . . . ")
-        sys.exit(0)
+        sys.exit(1)
     
-    print("Finished generating screencaptures", end='\n\n')
+    print("\nFinished getting screencaptures", end='\n\n')
 
     print("Writing to csv . . . ", end='\n\n')
 
