@@ -11,6 +11,13 @@ Run this on the command line with
 ```
 python3 redBullFetch.py videoname
 ```
+and set the time interval between screencaptures (in ms) using the second argument of
+
+```python
+if not generateScreenCaps(videoPath, 10000): 
+```
+
+at ~line 160 of the python script.
 
 I used youtube-dl to download the above video with default settings (HQ), but this might still work if you downloaded the video differently.
 
