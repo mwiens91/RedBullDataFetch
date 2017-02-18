@@ -25,6 +25,10 @@ Works on Linux, probably on Mac, and definitely not on Windows.
 
 Dependencies:
 
+Python 3 - https://www.python.org/
+
+FFmpeg - https://ffmpeg.org/
+
 tesserocr - https://pypi.python.org/pypi/tesserocr
 
 Pillow	  - https://pypi.python.org/pypi/Pillow/4.0.0
