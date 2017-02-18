@@ -1,4 +1,4 @@
-A Python3 script to read data from https://www.youtube.com/watch?v=raiFrxbHxV0
+A Python3 script to read data from https://www.youtube.com/watch?v=raiFrxbHxV0.
 Writes to a csv file data.csv in the cwd by default
 (if data.csv already exists, it will prompt for another file path)
 
