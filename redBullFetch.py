@@ -36,7 +36,7 @@ def generateScreenCaps(avFile, fps=3,
             raise OSError('Need an empty directory to generate screencaps!')
 
     # Generate screencaptures using ffmpeg
-    subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + fps,
+    subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + str(fps),
         screenDir + '/img%08d.bmp'])
 
     return
