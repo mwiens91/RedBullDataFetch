@@ -11,13 +11,14 @@ Run this on the command line with
 ```
 python3 redBullFetch.py videoname
 ```
-and set the time interval between screencaptures (in ms) using the second argument of
+and set the number of frames to capture in the script here:
 
 ```python
-if not generateScreenCaps(videoPath, 10000): 
+    try:
+        # Second argument is the number of frames you want to capture
+        # per second of video
+        generateScreenCaps(videoPath, 1)
 ```
-
-at ~line 160 of the python script.
 
 I used youtube-dl to download the above video with default settings (HQ), but this might still work if you downloaded the video differently.
 
@@ -31,7 +32,7 @@ FFmpeg - https://ffmpeg.org/
 
 tesserocr - https://pypi.python.org/pypi/tesserocr
 
-Pillow	  - https://pypi.python.org/pypi/Pillow/4.0.0
+Pillow - https://pypi.python.org/pypi/Pillow/4.0.0
 
 --
 
