@@ -14,7 +14,7 @@ def generateScreenCaps(avFile, fps=3,
     Arguments:
     avFile - relative path to video file
     fps - number of frames to capture per second
-            default is 15 if left out
+            Default is 3
     screenDir - relative path to screencapture directory
             Default is ./screens
     '''
