@@ -4,7 +4,7 @@ Writes to a csv file data.csv located in the current working directory by defaul
 
 Because of compression in the Youtube video, and also due to imperfections in Tesseract OCR, some data points become corrupted and are not included in the output csv. A consequence of this is that the time intervals between points will not in general be uniform.
 
-The error rate is about 35% (yikes!). Since the video has ~17,000 frames, this means that you can expect about 11,000 data points as an upper limit.
+The error rate is about 35% (yikes!). Since the video has ~17,000 frames, this means that you can expect about 11,000 data points as an upper limit. Some of these data points will be misread if Tesseract OCR mistakes one digit for another, so make sure to give the output csv a once-over before using the data.
 
 Run this on the command line with
 
@@ -20,7 +20,13 @@ and set the number of frames to capture in the script here:
         generateScreenCaps(videoPath, 1)
 ```
 
-I used youtube-dl to download the above video with default settings (HQ), but this might still work if you downloaded the video differently.
+
+I used youtube-dl to download the above video with default settings (HQ):
+
+```
+youtube-dl https://www.youtube.com/watch?v=raiFrxbHxV0
+
+```
 
 Works on Linux, probably on Mac, and definitely not on Windows.
 

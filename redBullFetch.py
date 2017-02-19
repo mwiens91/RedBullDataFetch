@@ -200,7 +200,7 @@ if __name__ == '__main__':
     try:
         # Second argument is the number of frames you want to capture
         # per second of video
-        generateScreenCaps(videoPath, 1)
+        generateScreenCaps(videoPath, 30)
     except OSError:
         print("Exiting script . . . ")
         sys.exit(1)
