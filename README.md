@@ -6,6 +6,8 @@ Because of compression in the Youtube video, and also due to imperfections in Te
 
 The error rate is about 35% (yikes!). Since the video has ~17,000 frames, this means that you can expect about 11,000 data points as an upper limit. Some of these data points will be misread if Tesseract OCR mistakes one digit for another, so make sure to give the output csv a once-over before using the data.
 
+--
+
 Run this on the command line with
 
 ```
@@ -21,11 +23,10 @@ and set the number of frames to capture in the script here:
 ```
 
 
-I used youtube-dl to download the above video with default settings (HQ):
+You can download the video with youtube-dl using default settings (HQ) like so:
 
 ```
 youtube-dl https://www.youtube.com/watch?v=raiFrxbHxV0
-
 ```
 
 Works on Linux, probably on Mac, and definitely not on Windows.
