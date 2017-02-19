@@ -37,7 +37,7 @@ def generateScreenCaps(avFile, fps=3,
 
     # Generate screencaptures using ffmpeg
     subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + str(fps),
-        screenDir + '/img%06d.bmp'])
+        screenDir + '/img%05d.bmp'])
 
     return
 
