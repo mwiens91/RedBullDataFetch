@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os
 import subprocess
 import re
@@ -53,7 +55,7 @@ def processScreenCap(screenCaptureObj):
 #    latGImg = screenCaptureObj.crop((595,751,635,772))
 #    longGImg = screenCaptureObj.crop((596,771,639,792))
     altitudeImg = screenCaptureObj.crop((1359,226,1464,254))    # in m
-    speedImg = screenCaptureObj.crop((1665,226,1764,256))       # in kph 
+    speedImg = screenCaptureObj.crop((1665,226,1764,256))       # in kph
     heartImg = screenCaptureObj.crop((1368,526,1460,555))       # in bpm
     respirImg = screenCaptureObj.crop((1356,565,1463,594))      # respiration
                                                                 # in ???
@@ -66,13 +68,13 @@ def processScreenCap(screenCaptureObj):
     # result in an improvement of text recognition, but doubtless
     # there are better modifications
     timeImg = timeImg.convert('L')
-    timeImg = timeImg.point(lambda x: 0 if x<220 else 255, '1') 
+    timeImg = timeImg.point(lambda x: 0 if x<220 else 255, '1')
 #    vertGImg = vertGImg.convert('L')
-#    vertGImg = vertGImg.point(lambda x: 0 if x<220 else 255, '1') 
+#    vertGImg = vertGImg.point(lambda x: 0 if x<220 else 255, '1')
 #    latGImg = latGImg.convert('L')
-#    latGImg = latGImg.point(lambda x: 0 if x<220 else 255, '1') 
+#    latGImg = latGImg.point(lambda x: 0 if x<220 else 255, '1')
 #    longGImg = longGImg.convert('L')
-#    longGImg = longGImg.point(lambda x: 0 if x<220 else 255, '1') 
+#    longGImg = longGImg.point(lambda x: 0 if x<220 else 255, '1')
 
     altitudeImg = altitudeImg.convert('L')
     speedImg = speedImg.convert('L')
@@ -90,7 +92,7 @@ def processScreenCap(screenCaptureObj):
 #    longG = image_to_text(longGImg)
 
 
-    # Strip trailing whitespace Tesseract OCR seems to pick up 
+    # Strip trailing whitespace Tesseract OCR seems to pick up
     time = time.rstrip()
     altitude = altitude.rstrip()
     speed = speed.rstrip()
@@ -161,14 +163,14 @@ def writeScreenCapData(screenDir=os.getcwd() + '/screens',
     dataFile = open(dataSheetFile, 'w')
     dataWriter = csv.writer(dataFile)
 
-    # Write headings to the data sheet 
+    # Write headings to the data sheet
     dataWriter.writerow(('Time (s)', 'Altitude (m)', 'Speed (kph)',
         'Heart rate (bpm)', 'Respiration (???)'))
 
     # Get all screencapture filenames
     screenCaps = os.listdir(screenDir)
     screenCaps.sort()
-    
+
     # Process each screencapture
     errorCount = 0
     successCount = 0
@@ -205,7 +207,7 @@ if __name__ == '__main__':
     except OSError:
         print("Exiting script . . . ")
         sys.exit(1)
-    
+
     print("Finished getting screencaptures", end='\n\n')
 
     print("Writing to csv . . . ", end='\n\n')
