@@ -4,6 +4,7 @@ import os
 import subprocess
 import re
 import csv
+import argparse
 from PIL import Image
 from tesserocr import image_to_text
 
@@ -196,14 +197,19 @@ def writeScreenCapData(screenDir=os.getcwd() + '/screens',
 if __name__ == '__main__':
     import sys
 
-    videoPath = sys.argv[1]
+    # Parse input arguments for video file and fps
+    parser = argparse.ArgumentParser()
+    parser.add_argument("vidFile", help="Path to video file", type=str)
+    parser.add_argument("fps", help="Number of frames to analyse per second",
+            type=int)
+    args = parser.parse_args()
 
     print("Getting screencaptures . . .", end='\n\n')
 
     try:
         # Second argument is the number of frames you want to capture
         # per second of video
-        generateScreenCaps(videoPath, 1/8)
+        generateScreenCaps(args.vidFile, args.fps)
     except OSError:
         print("Exiting script . . . ")
         sys.exit(1)
