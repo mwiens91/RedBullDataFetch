@@ -199,19 +199,19 @@ def writeFrameData(dataPath, frameDir, verbose=False):
 if __name__ == '__main__':
     import sys
 
-    # Parse input arguments for video file, fps, and output frame format
+    # Parse input arguments for video file, fps, output frame format, etc.
     parser = argparse.ArgumentParser()
     parser.add_argument("vidFile", help="Path to video file", type=str)
     parser.add_argument("-f", "--fps", type=float, default=3,
             help="Number of frames to analyse per second")
     parser.add_argument("-o", "--outtype", type=str, default='bmp',
             help="Output frame format. BMP, JPEG, and PNG are good choices.")
-    parser.add_argument("--verbose", type=bool, default=0,
-            help="Option to give more detailed output" )
     parser.add_argument("--datafile", type=str, default='./data.csv',
             help="Path to output csv datafile")
     parser.add_argument("--framedir", type=str, default='./frames',
             help="Directory to save video frames")
+    parser.add_argument("--verbose", type=bool, default=0,
+            help="Option to give more detailed output" )
     args = parser.parse_args()
 
     # Generate frames
