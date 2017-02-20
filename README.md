@@ -1,27 +1,23 @@
 A Python3 script to read data from https://www.youtube.com/watch?v=raiFrxbHxV0.
 
-Writes to a csv file data.csv located in the current working directory by default; if data.csv already exists, it will prompt for another file path.
+When run with no optional arguments, this writes data to a csv file 'data.csv' in the current working directory; video frames are saved in './frames' in uncompressed bmp format.
 
 Because of compression in the Youtube video, and also due to imperfections in Tesseract OCR, some data points become corrupted and are not included in the output csv. A consequence of this is that the time intervals between points will not in general be uniform.
 
-The error rate is about 15%. Since the video has ~17,000 frames, this means that you can expect about 14,500 data points as an upper limit. Some of these data points will be misread if Tesseract OCR mistakes one digit for another, so make sure to give the output csv a once-over before using the data.
+The error rate is about 15–20%. Since the video has ~17,000 frames, this means that you can expect about 14,500 data points as an upper limit. Some of these data points will be misread if Tesseract OCR mistakes one digit for another, so make sure to give the output csv a once-over before using the data.
 
 --
 
 Run this on the command line with
 
 ```
-python3 redBullFetch.py videoname
+python3 redBullFetch.py path_to_video
 ```
-and set the number of frames to capture in the script here:
+and display optional arguments with 
 
-```python
-    try:
-        # Second argument is the number of frames you want to capture
-        # per second of video
-        generateScreenCaps(videoPath, 1)
 ```
-
+python3 redBullFetch.py --help
+```
 
 You can download the video with youtube-dl using default settings (HQ) like so:
 
