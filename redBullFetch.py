@@ -8,7 +8,7 @@ import argparse
 from PIL import Image
 from tesserocr import image_to_text
 
-def generateScreenCaps(avFile, fps=3,
+def generateScreenCaps(avFile, fps=3, outType='bmp',
                         screenDir=os.getcwd() + '/screens'):
     '''
     Generate screen captures from a video file using an FFmpeg call
@@ -20,6 +20,10 @@ def generateScreenCaps(avFile, fps=3,
             Default is 3
     screenDir - relative path to screencapture directory
             Default is ./screens
+    outType - The output type of each frame. BMP is uncompressed so is fast to
+            extract, but will take up considerable disk space. JPEG and PNG are
+            compressed options that are lossey/loss-less and moderate/slow
+            respectively.
     '''
 
     # Check if save directory exists; create it if not
@@ -39,8 +43,9 @@ def generateScreenCaps(avFile, fps=3,
             raise OSError('Need an empty directory to generate screencaps!')
 
     # Generate screencaptures using ffmpeg
+    # Reference: https://ffmpeg.org/ffmpeg-filters.html#fps
     subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + str(fps),
-        screenDir + '/img%05d.bmp'])
+        screenDir + '/img%06d.'+outType.lower()])
 
     return
 
@@ -202,6 +207,8 @@ if __name__ == '__main__':
     parser.add_argument("vidFile", help="Path to video file", type=str)
     parser.add_argument("-f", "--fps", type=int, default=3,
             help="Number of frames to analyse per second")
+    parser.add_argument("-o", "--outtype", type=str, default='bmp',
+            help="Output frame format. BMP, JPEG, and PNG are good choices.")
     args = parser.parse_args()
 
     print("Getting screencaptures . . .", end='\n\n')
@@ -209,7 +216,7 @@ if __name__ == '__main__':
     try:
         # Second argument is the number of frames you want to capture
         # per second of video
-        generateScreenCaps(args.vidFile, args.fps)
+        generateScreenCaps(args.vidFile, args.fps, args.outtype)
     except OSError:
         print("Exiting script . . . ")
         sys.exit(1)
