@@ -54,4 +54,4 @@ Possible improvements:
 5. Add parallel processing support. A bit of work, but this is processing-heavy enough to warrant it.
 6. Extend error detection by comparing data-points with their neighbours. Currently error detection is only done for points in isolation.
 
-[*] (1) and (2) above would require using the tesserocr.PyTessAPI class to read images, rather than the convenient tesserocr.image_to_text function.
+[*] (1) (1) and (2) above would require using the tesserocr.PyTessAPI class to read images, rather than the convenient tesserocr.image_to_text function.
