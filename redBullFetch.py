@@ -200,8 +200,8 @@ if __name__ == '__main__':
     # Parse input arguments for video file and fps
     parser = argparse.ArgumentParser()
     parser.add_argument("vidFile", help="Path to video file", type=str)
-    parser.add_argument("fps", help="Number of frames to analyse per second",
-            type=int)
+    parser.add_argument("-f", "--fps", type=int, default=3,
+            help="Number of frames to analyse per second")
     args = parser.parse_args()
 
     print("Getting screencaptures . . .", end='\n\n')
