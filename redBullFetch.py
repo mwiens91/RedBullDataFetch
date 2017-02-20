@@ -80,14 +80,15 @@ def processScreenCap(screenCaptureObj):
     respirImg = respirImg.convert('L')
 
     # Extract text from images using Tesseract OCR
-    time = image_to_text(timeImg)
-    altitude = image_to_text(altitudeImg)
-    speed = image_to_text(speedImg)
-    heart = image_to_text(heartImg)
-    respir = image_to_text(respirImg)
+    time = image_to_text(timeImg, psm=6)
+    altitude = image_to_text(altitudeImg, psm=6)
+    speed = image_to_text(speedImg, psm=6)
+    heart = image_to_text(heartImg, psm=6)
+    respir = image_to_text(respirImg, psm=6)
 #    vertG = image_to_text(vertGImg)
 #    latG = image_to_text(latGImg)
 #    longG = image_to_text(longGImg)
+
 
     # Strip trailing whitespace Tesseract OCR seems to pick up 
     time = time.rstrip()
@@ -188,7 +189,7 @@ def writeScreenCapData(screenDir=os.getcwd() + '/screens',
     dataFile.close()
 
     return errorRate
-    
+
 
 if __name__ == '__main__':
     import sys
@@ -200,7 +201,7 @@ if __name__ == '__main__':
     try:
         # Second argument is the number of frames you want to capture
         # per second of video
-        generateScreenCaps(videoPath, 30)
+        generateScreenCaps(videoPath, 1/8)
     except OSError:
         print("Exiting script . . . ")
         sys.exit(1)
