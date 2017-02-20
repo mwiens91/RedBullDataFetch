@@ -210,7 +210,7 @@ if __name__ == '__main__':
             help="Path to output csv datafile")
     parser.add_argument("--framedir", type=str, default='./frames',
             help="Directory to save video frames")
-    parser.add_argument("--verbose", type=bool, default=0,
+    parser.add_argument("--verbose", 
             help="Option to give more detailed output" )
     args = parser.parse_args()
 
@@ -227,8 +227,12 @@ if __name__ == '__main__':
 
     # Write to data file
     print("Writing to %s . . ." % (args.datafile), end='\n\n')
-
-    errorRate = writeFrameData(args.datafile, args.framedir, args.verbose)
+    
+    if arg.verbose:
+        verbosity = False
+    else:
+        verbosity = True
+    errorRate = writeFrameData(args.datafile, args.framedir, verbosity)
 
     print(("Finished writing data with an error rate of (at least) "
         + str(errorRate)))
