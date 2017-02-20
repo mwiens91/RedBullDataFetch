@@ -48,5 +48,10 @@ Pillow - https://pypi.python.org/pypi/Pillow/4.0.0
 Possible improvements:
 
 1. Train Tesseract OCR. I have no idea how to do this, but from the little research I did it looks complicated.
-2. Process the images better. I spent about two hours trying this before giving up in frustration. I'm sure someone who knows what they're doing can make *huge* improvements to my error rate by touching up the image properly, but my attempts led to minimal improvement.
-3. Calculate time instead of grabbing the time from the screencaptures. Instead of using OCR to read the time text off the video—which has proved to be quite problematic—I could, knowing where I start taking screencaptures, knowing the time interval between screencaptures, and knowing the scale of time in the video ((how many seconds elapse in the time text of the video):(how many seconds elapsed in the video)—probably 1:1, but I wouldn't be shocked if it wasn't), I could just calculate the time a screencapture corresponds to—far more reliable than using Tesseract OCR to try and scan it. 
+2. Blacklist all non-numeric characters and whitelist numeric characters. This is actually easy, but see the (*) below
+3. Process the images better. I spent about two hours trying this before giving up in frustration. I'm sure someone who knows what they're doing can make *huge* improvements to my error rate by touching up the image properly, but my attempts led to minimal improvement.
+4. Calculate time instead of grabbing the time from the screencaptures. Instead of using OCR to read the time text off the video—which has proved to be quite problematic—I could, knowing where I start taking screencaptures and knowing the time interval between screencaptures, calculate the time a screencapture corresponds to—far more reliable than using Tesseract OCR to try and scan it. 
+5. Add parallel processing support. A bit of work, but this is processing-heavy enough to warrant it.
+6. Extend error detection by comparing data-points with their neighbours. Currently error detection is only done for points in isolation.
+
+* (1) and (2) above would require using the tesserocr.PyTessAPI class to read images, rather than the convenient tesserocr.image_to_text function.
