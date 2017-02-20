@@ -1,11 +1,14 @@
+#!/usr/bin/python3
+
 import os
 import subprocess
 import re
 import csv
+import argparse
 from PIL import Image
 from tesserocr import image_to_text
 
-def generateScreenCaps(avFile, fps=3,
+def generateScreenCaps(avFile, fps=3, outType='bmp',
                         screenDir=os.getcwd() + '/screens'):
     '''
     Generate screen captures from a video file using an FFmpeg call
@@ -17,6 +20,10 @@ def generateScreenCaps(avFile, fps=3,
             Default is 3
     screenDir - relative path to screencapture directory
             Default is ./screens
+    outType - The output type of each frame. BMP is uncompressed so is fast to
+            extract, but will take up considerable disk space. JPEG and PNG are
+            compressed options that are lossey/loss-less and moderate/slow
+            respectively.
     '''
 
     # Check if save directory exists; create it if not
@@ -36,8 +43,9 @@ def generateScreenCaps(avFile, fps=3,
             raise OSError('Need an empty directory to generate screencaps!')
 
     # Generate screencaptures using ffmpeg
+    # Reference: https://ffmpeg.org/ffmpeg-filters.html#fps
     subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + str(fps),
-        screenDir + '/img%05d.bmp'])
+        screenDir + '/img%06d.'+outType.lower()])
 
     return
 
@@ -53,7 +61,7 @@ def processScreenCap(screenCaptureObj):
 #    latGImg = screenCaptureObj.crop((595,751,635,772))
 #    longGImg = screenCaptureObj.crop((596,771,639,792))
     altitudeImg = screenCaptureObj.crop((1359,226,1464,254))    # in m
-    speedImg = screenCaptureObj.crop((1665,226,1764,256))       # in kph 
+    speedImg = screenCaptureObj.crop((1665,226,1764,256))       # in kph
     heartImg = screenCaptureObj.crop((1368,526,1460,555))       # in bpm
     respirImg = screenCaptureObj.crop((1356,565,1463,594))      # respiration
                                                                 # in ???
@@ -66,13 +74,13 @@ def processScreenCap(screenCaptureObj):
     # result in an improvement of text recognition, but doubtless
     # there are better modifications
     timeImg = timeImg.convert('L')
-    timeImg = timeImg.point(lambda x: 0 if x<220 else 255, '1') 
+    timeImg = timeImg.point(lambda x: 0 if x<220 else 255, '1')
 #    vertGImg = vertGImg.convert('L')
-#    vertGImg = vertGImg.point(lambda x: 0 if x<220 else 255, '1') 
+#    vertGImg = vertGImg.point(lambda x: 0 if x<220 else 255, '1')
 #    latGImg = latGImg.convert('L')
-#    latGImg = latGImg.point(lambda x: 0 if x<220 else 255, '1') 
+#    latGImg = latGImg.point(lambda x: 0 if x<220 else 255, '1')
 #    longGImg = longGImg.convert('L')
-#    longGImg = longGImg.point(lambda x: 0 if x<220 else 255, '1') 
+#    longGImg = longGImg.point(lambda x: 0 if x<220 else 255, '1')
 
     altitudeImg = altitudeImg.convert('L')
     speedImg = speedImg.convert('L')
@@ -90,7 +98,7 @@ def processScreenCap(screenCaptureObj):
 #    longG = image_to_text(longGImg)
 
 
-    # Strip trailing whitespace Tesseract OCR seems to pick up 
+    # Strip trailing whitespace Tesseract OCR seems to pick up
     time = time.rstrip()
     altitude = altitude.rstrip()
     speed = speed.rstrip()
@@ -161,14 +169,14 @@ def writeScreenCapData(screenDir=os.getcwd() + '/screens',
     dataFile = open(dataSheetFile, 'w')
     dataWriter = csv.writer(dataFile)
 
-    # Write headings to the data sheet 
+    # Write headings to the data sheet
     dataWriter.writerow(('Time (s)', 'Altitude (m)', 'Speed (kph)',
         'Heart rate (bpm)', 'Respiration (???)'))
 
     # Get all screencapture filenames
     screenCaps = os.listdir(screenDir)
     screenCaps.sort()
-    
+
     # Process each screencapture
     errorCount = 0
     successCount = 0
@@ -194,18 +202,25 @@ def writeScreenCapData(screenDir=os.getcwd() + '/screens',
 if __name__ == '__main__':
     import sys
 
-    videoPath = sys.argv[1]
+    # Parse input arguments for video file and fps
+    parser = argparse.ArgumentParser()
+    parser.add_argument("vidFile", help="Path to video file", type=str)
+    parser.add_argument("-f", "--fps", type=int, default=3,
+            help="Number of frames to analyse per second")
+    parser.add_argument("-o", "--outtype", type=str, default='bmp',
+            help="Output frame format. BMP, JPEG, and PNG are good choices.")
+    args = parser.parse_args()
 
     print("Getting screencaptures . . .", end='\n\n')
 
     try:
         # Second argument is the number of frames you want to capture
         # per second of video
-        generateScreenCaps(videoPath, 1/8)
+        generateScreenCaps(args.vidFile, args.fps, args.outtype)
     except OSError:
         print("Exiting script . . . ")
         sys.exit(1)
-    
+
     print("Finished getting screencaptures", end='\n\n')
 
     print("Writing to csv . . . ", end='\n\n')
