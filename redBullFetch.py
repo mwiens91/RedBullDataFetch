@@ -176,6 +176,9 @@ def writeFrameData(dataPath, frameDir, verbose=False):
     successCount = 0 
     for frame in frameList:
         with Image.open(frameDir + '/' + frame) as frameImage:
+            if verbose:
+                print('Processing ' + frame)
+
             frameData = processFrame(frameImage)
 
             if frameData != False:
@@ -217,13 +220,13 @@ if __name__ == '__main__':
     try:
         generateFrames(args.vidFile, args.fps, args.outtype, args.framedir)
     except OSError:
-        print("Exiting script . . . ")
+        print("Exiting script . . .")
         sys.exit(1)
 
     print("Finished getting video frames", end='\n\n')
 
     # Write to data file
-    print("Writing to %s . . . " % (args.datafile), end='\n\n')
+    print("Writing to %s . . ." % (args.datafile), end='\n\n')
 
     errorRate = writeFrameData(args.datafile, args.framedir, args.verbose)
 
