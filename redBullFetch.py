@@ -8,95 +8,89 @@ import argparse
 from PIL import Image
 from tesserocr import image_to_text
 
-def generateScreenCaps(avFile, fps=3, outType='bmp',
-                        screenDir=os.getcwd() + '/screens'):
+def generateFrames(videoPath, fps, outType, frameDir):
     '''
-    Generate screen captures from a video file using an FFmpeg call
+    Generate frames from a video file using an FFmpeg call
     on the command line
 
     Arguments:
-    avFile - relative path to video file
+    videoPath - relative path to video file
     fps - number of frames to capture per second
-            Default is 3
-    screenDir - relative path to screencapture directory
-            Default is ./screens
     outType - The output type of each frame. BMP is uncompressed so is fast to
             extract, but will take up considerable disk space. JPEG and PNG are
             compressed options that are lossey/loss-less and moderate/slow
             respectively.
+    frameDir - relative path to video frame save directory
     '''
 
     # Check if save directory exists; create it if not
-    if not os.path.exists(screenDir):
-        os.makedirs(screenDir)
+    if not os.path.exists(frameDir):
+        os.makedirs(frameDir)
 
     # Check if save directory is empty; if it isn't
     # prompt to use existing files or exit script
-    if os.listdir(screenDir):
-        print(screenDir + ' is not empty!', end='\n\n')
+    if os.listdir(frameDir):
+        print(frameDir + ' is not empty!', end='\n\n')
         print('Use existing files? (exit otherwise)')
         if input('(Y/N) > ').lower() in {'yes', 'y', 'ye', ''}:
-            print()
             return
         else:
-            print()
-            raise OSError('Need an empty directory to generate screencaps!')
+            raise OSError('Need an empty directory to generate frames!')
 
-    # Generate screencaptures using ffmpeg
+    # Generate video frames using ffmpeg
     # Reference: https://ffmpeg.org/ffmpeg-filters.html#fps
-    subprocess.run(['ffmpeg', '-i', './' + avFile, '-vf', 'fps=' + str(fps),
-        screenDir + '/img%06d.'+outType.lower()])
+    subprocess.run(['ffmpeg', '-i', videoPath, '-vf', 'fps=' + str(fps),
+        frameDir + '/img%06d.'+outType.lower()])
 
     return
 
 
-def processScreenCap(screenCaptureObj):
+def processFrame(frameImage):
     '''
-    Extract text from a screencapture PIL image object
+    Extract text from a PIL image frame 
     '''
 
     # Extract subset of image corresponding to data
-    timeImg = screenCaptureObj.crop((589,656,751,701))
-#    vertGImg = screenCaptureObj.crop((595,731,642,751))
-#    latGImg = screenCaptureObj.crop((595,751,635,772))
-#    longGImg = screenCaptureObj.crop((596,771,639,792))
-    altitudeImg = screenCaptureObj.crop((1359,226,1464,254))    # in m
-    speedImg = screenCaptureObj.crop((1665,226,1764,256))       # in kph
-    heartImg = screenCaptureObj.crop((1368,526,1460,555))       # in bpm
-    respirImg = screenCaptureObj.crop((1356,565,1463,594))      # respiration
-                                                                # in ???
+    timeImage = frameImage.crop((589,656,751,701))
+#    vertGImage = frameImage.crop((595,731,642,751))
+#    latGImage = frameImage.crop((595,751,635,772))
+#    longGImage = frameImage.crop((596,771,639,792))
+    altitudeImage = frameImage.crop((1359,226,1464,254))    # in m
+    speedImage = frameImage.crop((1665,226,1764,256))       # in kph
+    heartImage = frameImage.crop((1368,526,1460,555))       # in bpm
+    respirImage = frameImage.crop((1356,565,1463,594))      # respiration
+                                                            # in ???
 
     # Process images for more accurate OCR readings
-    # The time has a semitransparent moving background,
-    # making text recognition difficult
-    #
-    # I've kind of haphazardly determined that these settings
-    # result in an improvement of text recognition, but doubtless
-    # there are better modifications
-    timeImg = timeImg.convert('L')
-    timeImg = timeImg.point(lambda x: 0 if x<220 else 255, '1')
-#    vertGImg = vertGImg.convert('L')
-#    vertGImg = vertGImg.point(lambda x: 0 if x<220 else 255, '1')
-#    latGImg = latGImg.convert('L')
-#    latGImg = latGImg.point(lambda x: 0 if x<220 else 255, '1')
-#    longGImg = longGImg.convert('L')
-#    longGImg = longGImg.point(lambda x: 0 if x<220 else 255, '1')
+    # - convert('L') makes the image greyscale
+    # - the inline function forces pixels either black
+    #   or white
 
-    altitudeImg = altitudeImg.convert('L')
-    speedImg = speedImg.convert('L')
-    heartImg = heartImg.convert('L')
-    respirImg = respirImg.convert('L')
+    timeImage = timeImage.convert('L')
+    timeImage = timeImage.point(lambda x: 0 if x<220 else 255, '1')
+#    vertGImage = vertGImage.convert('L')
+#    vertGImage = vertGImage.point(lambda x: 0 if x<220 else 255, '1')
+#    latGImage = latGImage.convert('L')
+#    latGImage = latGImage.point(lambda x: 0 if x<220 else 255, '1')
+#    longGImage = longGImage.convert('L')
+#    longGImage = longGImage.point(lambda x: 0 if x<220 else 255, '1')
+
+    altitudeImage = altitudeImage.convert('L')
+    speedImage = speedImage.convert('L')
+    heartImage = heartImage.convert('L')
+    respirImage = respirImage.convert('L')
 
     # Extract text from images using Tesseract OCR
-    time = image_to_text(timeImg, psm=6)
-    altitude = image_to_text(altitudeImg, psm=6)
-    speed = image_to_text(speedImg, psm=6)
-    heart = image_to_text(heartImg, psm=6)
-    respir = image_to_text(respirImg, psm=6)
-#    vertG = image_to_text(vertGImg)
-#    latG = image_to_text(latGImg)
-#    longG = image_to_text(longGImg)
-
+    # Page Segmentation Method 6 says
+    # "Assume a single uniform block of text."
+    time = image_to_text(timeImage, psm=6)
+    altitude = image_to_text(altitudeImage, psm=6)
+    speed = image_to_text(speedImage, psm=6)
+    heart = image_to_text(heartImage, psm=6)
+    respir = image_to_text(respirImage, psm=6)
+#    vertG = image_to_text(vertGImage)
+#    latG = image_to_text(latGImage)
+#    longG = image_to_text(longGImage)
 
     # Strip trailing whitespace Tesseract OCR seems to pick up
     time = time.rstrip()
@@ -130,62 +124,62 @@ def processScreenCap(screenCaptureObj):
             raise AttributeError('Bad data')
 
         # Convert time components into seconds
-        timePretty = (float(matchTime.group('mins')) * 60
+        timeReal = (float(matchTime.group('mins')) * 60
                 + float(matchTime.group('secs'))
                 + float(matchTime.group('msecs')) * 1e-3)
 
         # In the video time is negative before the jump
         if matchTime.group('sign') == '-':
-                timePretty *= -1
+                timeReal *= -1
 
-        return (timePretty, altitude, speed, heart, respir)
+        return (timeReal, altitude, speed, heart, respir)
 
     except AttributeError:
         # Such error! OCR failed!
         return False
 
 
-def writeScreenCapData(screenDir=os.getcwd() + '/screens',
-                        dataSheetFile='./data.csv'):
+def writeFrameData(dataPath, frameDir, verbose=False):
     '''
-    Write data to a csv file. A "parent" function.
+    Write frame data to csv file.
 
     Arguments:
-    screenDir - relative path to screencapture directory
-            Default is ./screens
-    dataSheetFile - relative path to csv datasheet
-            Defailt is ./data.csv
+    dataPath - relative path to data file
+    frameDir - relative path to directory containing
+                frames
+    verbose - flag controlling whether to give lots of
+                output to stdout. Default is off.
     '''
 
-    # Open a datasheet
-    # If the file given in the argument dataSheetFile exists,
-    # prompt for a new file path until there isn't a conflict.
-    while os.path.isfile(dataSheetFile):
-        print(dataSheetFile + " already exists!")
+    # Open the data file
+    # If the data file already exists, prompt for a new file
+    # path until there isn't a conflict.
+    while os.path.isfile(dataPath):
+        print(dataPath + " already exists!")
         print("Enter the relative path for the datasheet:")
-        dataSheetFile = input("> ")
+        dataPath = input("> ")
         print()
 
-    dataFile = open(dataSheetFile, 'w')
+    dataFile = open(dataPath, 'w')
     dataWriter = csv.writer(dataFile)
 
     # Write headings to the data sheet
     dataWriter.writerow(('Time (s)', 'Altitude (m)', 'Speed (kph)',
         'Heart rate (bpm)', 'Respiration (???)'))
 
-    # Get all screencapture filenames
-    screenCaps = os.listdir(screenDir)
-    screenCaps.sort()
+    # Get all video frame filenames
+    frameList = os.listdir(frameDir)
+    frameList.sort()
 
-    # Process each screencapture
+    # Process each frame 
     errorCount = 0
-    successCount = 0
-    for cap in screenCaps:
-        with Image.open(screenDir + '/' + cap) as capObj:
-            imgData = processScreenCap(capObj)
+    successCount = 0 
+    for frame in frameList:
+        with Image.open(frameDir + '/' + frame) as frameImage:
+            frameData = processFrame(frameImage)
 
-            if imgData != False:
-                dataWriter.writerow(imgData)
+            if frameData != False:
+                dataWriter.writerow(frameData)
                 successCount += 1
             else:
                 errorCount += 1
@@ -202,29 +196,36 @@ def writeScreenCapData(screenDir=os.getcwd() + '/screens',
 if __name__ == '__main__':
     import sys
 
-    # Parse input arguments for video file and fps
+    # Parse input arguments for video file, fps, and output frame format
     parser = argparse.ArgumentParser()
     parser.add_argument("vidFile", help="Path to video file", type=str)
-    parser.add_argument("-f", "--fps", type=int, default=3,
+    parser.add_argument("-f", "--fps", type=float, default=3,
             help="Number of frames to analyse per second")
     parser.add_argument("-o", "--outtype", type=str, default='bmp',
             help="Output frame format. BMP, JPEG, and PNG are good choices.")
+    parser.add_argument("--verbose", type=bool, default=0,
+            help="Option to give more detailed output" )
+    parser.add_argument("--datafile", type=str, default='./data.csv',
+            help="Path to output csv datafile")
+    parser.add_argument("--framedir", type=str, default='./frames',
+            help="Directory to save video frames")
     args = parser.parse_args()
 
-    print("Getting screencaptures . . .", end='\n\n')
+    # Generate frames
+    print("Getting video frames . . .", end='\n\n')
 
     try:
-        # Second argument is the number of frames you want to capture
-        # per second of video
-        generateScreenCaps(args.vidFile, args.fps, args.outtype)
+        generateFrames(args.vidFile, args.fps, args.outtype, args.framedir)
     except OSError:
         print("Exiting script . . . ")
         sys.exit(1)
 
-    print("Finished getting screencaptures", end='\n\n')
+    print("Finished getting video frames", end='\n\n')
 
-    print("Writing to csv . . . ", end='\n\n')
+    # Write to data file
+    print("Writing to %s . . . " % (args.datafile), end='\n\n')
 
-    errorRate = writeScreenCapData()
+    errorRate = writeFrameData(args.datafile, args.framedir, args.verbose)
 
-    print("Finished writing to csv with an error rate of " + str(errorRate))
+    print(("Finished writing data with an error rate of (at least) "
+        + str(errorRate)))
