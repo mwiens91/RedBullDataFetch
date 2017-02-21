@@ -1,6 +1,6 @@
 A Python3 script to read data from https://www.youtube.com/watch?v=raiFrxbHxV0.
 
-When run with no optional arguments, this writes data to a csv file 'data.csv' in the current working directory; video frames are saved in './frames' in uncompressed bmp format. Also, check to make sure that the default time offset () corresponds to the 00:00.000 clock time in the video frame for your file; if not pass it in with --timeoffset.
+When run with no optional arguments, this writes data to a csv file 'data.csv' in the current working directory; video frames are saved in './frames' in uncompressed bmp format. Also, check to make sure that the default time offset (7.750s) corresponds to the 00:00.000 clock time in the video frame for your file; if not pass it in with --timeoffset.
 
 Because of compression in the Youtube video, and also due to imperfections in Tesseract OCR, some data points become corrupted and are not included in the output csv. A consequence of this is that the time intervals between points will not in general be uniform.
 
