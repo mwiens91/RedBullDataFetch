@@ -214,6 +214,12 @@ if __name__ == '__main__':
             help="Option to give more detailed output" )
     args = parser.parse_args()
 
+    # Correct possible oversampling
+    if args.fps > 29.97:
+        print("Correcting oversampling . . .")
+        print("Sampling changed to 29.97fps (maximum)", end='\n\n')
+        args.fps = 29.97
+
     # Generate frames
     print("Getting video frames . . .", end='\n\n')
 
