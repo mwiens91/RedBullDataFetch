@@ -8,7 +8,8 @@ import argparse
 from PIL import Image
 from tesserocr import image_to_text
 
-def generateFrames(videoPath, fps, outType, frameDir):
+def generateFrames(videoPath, fps, outType, frameDir,
+                    verbose=False, quiet=False):
     '''
     Generate frames from a video file using an FFmpeg call
     on the command line
@@ -21,6 +22,8 @@ def generateFrames(videoPath, fps, outType, frameDir):
             compressed options that are lossey/loss-less and moderate/slow
             respectively.
     frameDir - relative path to video frame save directory
+    verbose - option to give more output
+    quiet - optoin to give less output
     '''
 
     # Check if save directory exists; create it if not
@@ -37,9 +40,18 @@ def generateFrames(videoPath, fps, outType, frameDir):
         else:
             raise OSError('Need an empty directory to generate frames!')
 
+    # Set how noisy ffmpeg should be
+    if verbose:
+        loglevel = 'verbose'
+    elif quiet:
+        loglevel = 'fatal'
+    else:
+        loglevel = 'info'
+
     # Generate video frames using ffmpeg
     # Reference: https://ffmpeg.org/ffmpeg-filters.html#fps
-    subprocess.run(['ffmpeg', '-i', videoPath, '-vf', 'fps=' + str(fps),
+    subprocess.run(['ffmpeg', '-loglevel', loglevel,
+        '-i', videoPath, '-vf', 'fps=' + str(fps),
         frameDir + '/img%06d.'+outType.lower()])
 
     return
@@ -139,7 +151,7 @@ def processFrame(frameImage):
         return False
 
 
-def writeFrameData(dataPath, frameDir, verbose=False):
+def writeFrameData(dataPath, frameDir, verbose=False, quiet=False):
     '''
     Write frame data to csv file.
 
@@ -147,8 +159,8 @@ def writeFrameData(dataPath, frameDir, verbose=False):
     dataPath - relative path to data file
     frameDir - relative path to directory containing
                 frames
-    verbose - flag controlling whether to give lots of
-                output to stdout. Default is off.
+    verbose - option to give more output
+    quiet - option to give less output
     '''
 
     # Open the data file
@@ -213,29 +225,40 @@ if __name__ == '__main__':
     parser.add_argument("--verbose",
             help="Option to give more detailed output",
             action="store_true")
+    parser.add_argument("--quiet",
+            help="Option to give less ouput",
+            action="store_true")
     args = parser.parse_args()
 
     # Correct possible oversampling
     if args.fps > 29.97:
-        print("Correcting oversampling . . .")
-        print("Sampling changed to 29.97fps (maximum)", end='\n\n')
+        if not args.quiet:
+            print("Correcting oversampling . . .")
+            print("Sampling changed to 29.97fps (maximum)", end='\n\n')
         args.fps = 29.97
 
     # Generate frames
-    print("Getting video frames . . .", end='\n\n')
+    if not args.quiet:
+        print("Getting video frames . . .", end='\n\n')
 
     try:
-        generateFrames(args.vidFile, args.fps, args.frameext, args.framedir)
+        generateFrames(args.vidFile, args.fps, args.frameext, args.framedir,
+                            args.verbose, args.quiet)
     except OSError:
-        print("Exiting script . . .")
+        if not args.quiet:
+            print("Exiting script . . .")
         sys.exit(1)
 
-    print("Finished getting video frames", end='\n\n')
+    if not args.quiet:
+        print("Finished getting video frames", end='\n\n')
 
     # Write to data file
-    print("Writing to %s . . ." % (args.output), end='\n\n')
+    if not args.quiet:
+        print("Writing to %s . . ." % (args.output), end='\n\n')
 
-    errorRate = writeFrameData(args.output, args.framedir, args.verbose)
+    errorRate = writeFrameData(args.output, args.framedir,
+                                 args.verbose, args.quiet)
 
-    print(("Finished writing data with an error rate of (at least) "
-        + str(errorRate)))
+    if not args.quiet:
+        print(("Finished writing data with an error rate of (at least) "
+            + str(errorRate)))
