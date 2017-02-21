@@ -31,7 +31,7 @@ def generateFrames(videoPath, fps, outType, frameDir):
     # prompt to use existing files or exit script
     if os.listdir(frameDir):
         print(frameDir + ' is not empty!', end='\n\n')
-        print('Use existing files? (exit otherwise)')
+        print('Use existing files? (assuming fps=%f)' % fps)
         if input('(Y/N) > ').lower() in {'yes', 'y', 'ye', ''}:
             return
         else:
@@ -40,18 +40,20 @@ def generateFrames(videoPath, fps, outType, frameDir):
     # Generate video frames using ffmpeg
     # Reference: https://ffmpeg.org/ffmpeg-filters.html#fps
     subprocess.run(['ffmpeg', '-i', videoPath, '-vf', 'fps=' + str(fps),
-        frameDir + '/img%06d.'+outType.lower()])
+        frameDir + '/img%06d' + '_fps_' + str(fps) + '.' + outType.lower()])
 
     return
 
 
 def processFrame(frameImage):
     '''
-    Extract text from a PIL image frame 
+    Extract text from a PIL image frame.
+    Lots of commented out code, depending on
+    what you want to read using the OCR.
     '''
 
     # Extract subset of image corresponding to data
-    timeImage = frameImage.crop((589,656,751,701))
+#    timeImage = frameImage.crop((589,656,751,701))
 #    vertGImage = frameImage.crop((595,731,642,751))
 #    latGImage = frameImage.crop((595,751,635,772))
 #    longGImage = frameImage.crop((596,771,639,792))
@@ -66,8 +68,8 @@ def processFrame(frameImage):
     # - the inline function forces pixels either black
     #   or white
 
-    timeImage = timeImage.convert('L')
-    timeImage = timeImage.point(lambda x: 0 if x<220 else 255, '1')
+#    timeImage = timeImage.convert('L')
+#    timeImage = timeImage.point(lambda x: 0 if x<220 else 255, '1')
 #    vertGImage = vertGImage.convert('L')
 #    vertGImage = vertGImage.point(lambda x: 0 if x<220 else 255, '1')
 #    latGImage = latGImage.convert('L')
@@ -83,7 +85,7 @@ def processFrame(frameImage):
     # Extract text from images using Tesseract OCR
     # Page Segmentation Method 6 says
     # "Assume a single uniform block of text."
-    time = image_to_text(timeImage, psm=6)
+#    time = image_to_text(timeImage, psm=6)
     altitude = image_to_text(altitudeImage, psm=6)
     speed = image_to_text(speedImage, psm=6)
     heart = image_to_text(heartImage, psm=6)
@@ -93,7 +95,7 @@ def processFrame(frameImage):
 #    longG = image_to_text(longGImage)
 
     # Strip trailing whitespace Tesseract OCR seems to pick up
-    time = time.rstrip()
+#    time = time.rstrip()
     altitude = altitude.rstrip()
     speed = speed.rstrip()
     heart = heart.rstrip()
@@ -103,8 +105,8 @@ def processFrame(frameImage):
 #    longG = longG.rstrip()
 
     # Split time string into components
-    matchTime = re.match(
-        r'^(?P<sign>-?)(?P<mins>\d+):(?P<secs>\d+)\.(?P<msecs>\d+)$', time)
+#    matchTime = re.match(
+#        r'^(?P<sign>-?)(?P<mins>\d+):(?P<secs>\d+)\.(?P<msecs>\d+)$', time)
 
     # Return the data points if everything is okay. Otherwise
     # return false
@@ -116,34 +118,37 @@ def processFrame(frameImage):
         if (
             len(heart) != 3 or                  # heart rate is 3 digits
             len(respir) != 2 or                 # respiration is 2 digits
-            len(speed) == 0 or                  # speed is not 0 digits
-            len(matchTime.group('mins')) != 2 or    # Next 3 lines:
-            len(matchTime.group('secs')) != 2 or    # time not corrupted
-            len(matchTime.group('msecs')) != 3
+            len(speed) == 0                     # speed is not 0 digits
+#            len(matchTime.group('mins')) != 2 or    # Next 3 lines:
+#            len(matchTime.group('secs')) != 2 or    # time not corrupted
+#            len(matchTime.group('msecs')) != 3
             ):
             raise AttributeError('Bad data')
 
         # Convert time components into seconds
-        timeReal = (float(matchTime.group('mins')) * 60
-                + float(matchTime.group('secs'))
-                + float(matchTime.group('msecs')) * 1e-3)
+#        timeReal = (float(matchTime.group('mins')) * 60
+#                + float(matchTime.group('secs'))
+#                + float(matchTime.group('msecs')) * 1e-3)
 
         # In the video time is negative before the jump
-        if matchTime.group('sign') == '-':
-                timeReal *= -1
+#        if matchTime.group('sign') == '-':
+#                timeReal *= -1
 
-        return (timeReal, altitude, speed, heart, respir)
+        return [altitude, speed, heart, respir]
 
     except AttributeError:
         # Such error! OCR failed!
         return False
 
 
-def writeFrameData(dataPath, frameDir, verbose=False):
+def writeFrameData(fps, timeOffset, dataPath, frameDir, verbose=False):
     '''
     Write frame data to csv file.
 
     Arguments:
+    fps - number of frames captured per seconds
+    timeOffset - Time in video (in s) corresponding
+                to frame clock time 00:00.000
     dataPath - relative path to data file
     frameDir - relative path to directory containing
                 frames
@@ -171,21 +176,33 @@ def writeFrameData(dataPath, frameDir, verbose=False):
     frameList = os.listdir(frameDir)
     frameList.sort()
 
+    # Determine time interval between frames
+    timeSep = 1 / fps
+
     # Process each frame 
+    # Couple of starting variables
     errorCount = 0
     successCount = 0 
+    frameTime = -timeOffset + 1/fps / 2     # see http://bit.ly/2loKRZh
+
     for frame in frameList:
         with Image.open(frameDir + '/' + frame) as frameImage:
             if verbose:
                 print('Processing ' + frame)
 
+            # Pull data off the frame with OCR
             frameData = processFrame(frameImage)
 
             if frameData != False:
-                dataWriter.writerow(frameData)
+                fullData = [frameTime]
+                fullData += frameData
+                dataWriter.writerow(fullData)
                 successCount += 1
             else:
                 errorCount += 1
+
+            # Set the time for the next iteration
+            frameTime += timeSep
 
     # Calculate the error rate
     errorRate = float(errorCount) / (errorCount + successCount)
@@ -201,24 +218,26 @@ if __name__ == '__main__':
 
     # Parse input arguments for video file, fps, output frame format, etc.
     parser = argparse.ArgumentParser()
-    parser.add_argument("vidFile", help="Path to video file", type=str)
+    parser.add_argument("vidfile", help="Path to video file", type=str)
     parser.add_argument("-f", "--fps", type=float, default=3,
-            help="Number of frames to analyse per second")
+        help="Number of frames to analyse per second")
     parser.add_argument("-o", "--outtype", type=str, default='bmp',
-            help="Output frame format. BMP, JPEG, and PNG are good choices.")
+        help="Output frame format. BMP, JPEG, and PNG are good choices.")
+    parser.add_argument("--timeoffset", type=float, default=7.75,
+        help="Time in video (in s) corresponding to frame clock time 00:00.000")
     parser.add_argument("--datafile", type=str, default='./data.csv',
-            help="Path to output csv datafile")
+        help="Path to output csv datafile")
     parser.add_argument("--framedir", type=str, default='./frames',
-            help="Directory to save video frames")
+        help="Directory to save video frames")
     parser.add_argument("--verbose", type=bool, default=0,
-            help="Option to give more detailed output" )
+        help="Option to give more detailed output" )
     args = parser.parse_args()
 
     # Generate frames
     print("Getting video frames . . .", end='\n\n')
 
     try:
-        generateFrames(args.vidFile, args.fps, args.outtype, args.framedir)
+        generateFrames(args.vidfile, args.fps, args.outtype, args.framedir)
     except OSError:
         print("Exiting script . . .")
         sys.exit(1)
@@ -228,7 +247,8 @@ if __name__ == '__main__':
     # Write to data file
     print("Writing to %s . . ." % (args.datafile), end='\n\n')
 
-    errorRate = writeFrameData(args.datafile, args.framedir, args.verbose)
+    errorRate = writeFrameData(args.fps, args.timeoffset, args.datafile,
+                    args.framedir, args.verbose)
 
     print(("Finished writing data with an error rate of (at least) "
         + str(errorRate)))
