@@ -47,7 +47,7 @@ def generateFrames(videoPath, fps, outType, frameDir):
 
 def processFrame(frameImage):
     '''
-    Extract text from a PIL image frame 
+    Extract text from a PIL image frame
     '''
 
     # Extract subset of image corresponding to data
@@ -171,9 +171,9 @@ def writeFrameData(dataPath, frameDir, verbose=False):
     frameList = os.listdir(frameDir)
     frameList.sort()
 
-    # Process each frame 
+    # Process each frame
     errorCount = 0
-    successCount = 0 
+    successCount = 0
     for frame in frameList:
         with Image.open(frameDir + '/' + frame) as frameImage:
             if verbose:
@@ -202,15 +202,15 @@ if __name__ == '__main__':
     # Parse input arguments for video file, fps, output frame format, etc.
     parser = argparse.ArgumentParser()
     parser.add_argument("vidFile", help="Path to video file", type=str)
+    parser.add_argument("-o", "--output", type=str, default='./data.csv',
+            help="Path to output csv datafile")
     parser.add_argument("-f", "--fps", type=float, default=3,
             help="Number of frames to analyse per second")
-    parser.add_argument("-o", "--outtype", type=str, default='bmp',
+    parser.add_argument("-e", "--frameext", type=str, default='bmp',
             help="Output frame format. BMP, JPEG, and PNG are good choices.")
-    parser.add_argument("--datafile", type=str, default='./data.csv',
-            help="Path to output csv datafile")
-    parser.add_argument("--framedir", type=str, default='./frames',
+    parser.add_argument("-d", "--framedir", type=str, default='./frames',
             help="Directory to save video frames")
-    parser.add_argument("--verbose", 
+    parser.add_argument("--verbose",
             help="Option to give more detailed output",
             action="store_true")
     args = parser.parse_args()
@@ -225,7 +225,7 @@ if __name__ == '__main__':
     print("Getting video frames . . .", end='\n\n')
 
     try:
-        generateFrames(args.vidFile, args.fps, args.outtype, args.framedir)
+        generateFrames(args.vidFile, args.fps, args.frameext, args.framedir)
     except OSError:
         print("Exiting script . . .")
         sys.exit(1)
@@ -233,9 +233,9 @@ if __name__ == '__main__':
     print("Finished getting video frames", end='\n\n')
 
     # Write to data file
-    print("Writing to %s . . ." % (args.datafile), end='\n\n')
-    
-    errorRate = writeFrameData(args.datafile, args.framedir, args.verbose)
+    print("Writing to %s . . ." % (args.output), end='\n\n')
+
+    errorRate = writeFrameData(args.output, args.framedir, args.verbose)
 
     print(("Finished writing data with an error rate of (at least) "
         + str(errorRate)))
