@@ -6,6 +6,8 @@ Because of compression in the Youtube video, and also due to imperfections in Te
 
 The error rate is about 15–20%. Since the video has ~17,000 frames, this means that you can expect about 14,500 data points as an upper limit. Some of these data points will be misread if Tesseract OCR mistakes one digit for another, so make sure to give the output csv a once-over before using the data.
 
+See also: 'calculateTime' branch, which calculates the time of the jump a video frame corresponds to, rather than reading this time off the frame. There is error associated with this approach too, but if you are capturing a large number of frames, the error in calculateTime' is probably less than the error in 'master'. Both branches will (ideally) be kept current.
+
 --
 
 Run this on the command line with
