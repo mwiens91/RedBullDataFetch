@@ -23,7 +23,7 @@ def generateFrames(videoPath, fps, outType, frameDir,
             respectively.
     frameDir - relative path to video frame save directory
     verbose - option to give more output
-    quiet - optoin to give less output
+    quiet - option to give less output
     '''
 
     # Check if save directory exists; create it if not
