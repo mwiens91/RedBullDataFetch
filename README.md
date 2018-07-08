@@ -2,7 +2,7 @@ A Python3 script to read data from https://www.youtube.com/watch?v=raiFrxbHxV0.
 
 When run with no optional arguments, this writes data to a csv file 'data.csv' in the current working directory; video frames are saved in './frames' in uncompressed bmp format.
 
-Because of compression in the Youtube video, and also due to imperfections in Tesseract OCR, some data points become corrupted and are not included in the output csv. A consequence of this is that the time intervals between points will not in general be uniform.
+Because of compression in the YouTube video and imperfections in Tesseract OCR, some data points become corrupted and are not included in the output csv. A consequence of this is that the time intervals between points, in general, will not be uniform.
 
 The error rate is about 15–20%. Since the video has ~17,000 frames, this means that you can expect about 14,500 data points as an upper limit. Some of these data points will be misread if Tesseract OCR mistakes one digit for another, so make sure to give the output csv a once-over before using the data.
 
